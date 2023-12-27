@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #8e9eab, #eef2f3);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            width: 350px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .card-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-login {
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $( "#form" ).submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/login',
+                    data: $('#form').serialize(),
+                    dataType: "json",
+                    success: function(response){
+                        $('#form')[0].reset();
+                        document.getElementById("check").innerHTML=response.Success;
+                        setTimeout(function(){
+                            document.getElementById("check").innerHTML="";
+                        }, 3000);
+                        if (response.Success=="Success!") {
+                            document.getElementById("redirectLink").click();
+                        };
+                    },
+                    error: function() {
+                        // Handle error
+                    }
+                })
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h2 class="card-title">Login</h2>
+        <form id="form" method="post">
+            <div class="form-group">
+                <input type="text" name="email" placeholder="E-mail" required="" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required="" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Login" class="btn btn-success btn-login">
+            </div>
+        </form>
+        <div class="alert alert-danger">
+            <span id="check"></span>
+        </div>
+        <div>
+            <span>Forgot your password? <a href="/forgetpass">Click here</a></span>
+        </div>
+        <div>
+            <span>Create a new account? <a href="/">Register here</a></span>
+        </div>
+        <a href="/homepass" id="redirectLink" style="display:none;"></a>
+    </div>
+</body>
+</html>

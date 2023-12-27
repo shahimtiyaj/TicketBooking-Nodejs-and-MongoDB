@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ExcelToDb</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://bootswatch.com/4/cosmo/bootstrap.css">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+</head>
+<body>
+    <div class="fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="#">Logistics</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- Admin Login Button -->
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light my-2 my-sm-0" onclick="openAdminLogin()">Admin Login</button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="row" style="margin-top: 125px; margin-left: 40%; margin-right: 10%; width: fit-content;">
+        <div class="lg-6">
+            <div class="card border-danger mb-3" style="max-width: 20rem;">
+                <div class="card-header">Upload Excel File</div>
+                <div class="card-body">
+                    <form action="/upload" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="excel">Browse File</label>
+                            <input type="file" class="form-control" name="excel" required><br><br>
+                            <input type="submit" value="Submit">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div><br><br>
+
+    <% if(result.length > 0) { %>
+        <table id="dataTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Sl. No</th>
+                    <th>CN</th>
+                    <th>POL</th>
+                    <th>POD</th>
+                    <th>TOS</th>
+                    <th>ETA POD</th>
+                    <th>CARGO TYPE</th>
+                    <th>FRT(All In)</th>
+                    <th>Carrier</th>
+                    <th>VESSEL NAME</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var x = 0; x < result.length; x++) { %>
+                    <tr id="row_<%= x + 1 %>">
+                        <td ><%= x + 1 %></td>
+                        <td contenteditable="true"><%= result[x].cn %></td>
+                        <td><%= result[x].pol %></td>
+                        <td><%= result[x].pod %></td>
+                        <td><%= result[x].tos %></td>
+                        <td><%= result[x].eta_pod %></td>
+                        <td><%= result[x].cargo_type %></td>
+                        <td><%= result[x].frt_all_in %></td>
+                        <td><%= result[x].carrier %></td>
+                        <td><%= result[x].vessel_name %></td>
+                        <td>
+                            <!-- Add update and delete buttons with respective functionality -->
+                            <button onclick="editRow('<%= result[x]._id %>')">Edit</button>
+                            <button  onclick="updateRow('<%= result[x]._id %>')">Update</button>
+                            <button onclick="confirmDelete('<%= result[x]._id %>')">Delete</button>
+
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    <% } %>
+
+    <!-- Bootstrap and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+     <!-- Scripts -->
+     <script>
+        // DataTables initialization script
+        $(document).ready(function() {
+            $('#dataTable').DataTable();
+        });
+
+        function editRow(excelId) {
+        document.getElementById(`cn_${excelId}`).setAttribute('contenteditable', 'true');
+        document.getElementById(`pol_${excelId}`).setAttribute('contenteditable', 'true');
+        // Include other columns in a similar manner
+
+        document.querySelector(`button[onclick="updateRow('${excelId}')"]`).style.display = 'inline-block';
+    }
+
+    function updateRow(excelId) {
+        const updatedData = {
+            cn: document.getElementById(`cn_${excelId}`).innerText,
+            pol: document.getElementById(`pol_${excelId}`).innerText,
+            // Include other columns in a similar manner
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', `/updateExcel/${excelId}`, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                console.log(xhr.responseText);
+                // Hide the update button after updating the data
+                document.querySelector(`button[onclick="updateRow('${excelId}')"]`).style.display = 'none';
+                // Disable contenteditable after update
+                document.getElementById(`cn_${excelId}`).setAttribute('contenteditable', 'false');
+                document.getElementById(`pol_${excelId}`).setAttribute('contenteditable', 'false');
+                // Include other columns in a similar manner
+            } else {
+                console.error('Request failed with status:', xhr.status);
+                // Handle error cases
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Request failed');
+            // Handle error cases
+        };
+
+        xhr.send(JSON.stringify(updatedData));
+    }
+
+
+
+        function confirmDelete(excelId) {
+            Swal.fire({
+                title: 'Are you sure, you want to delete?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send a DELETE request to delete the data
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('DELETE', `/delete/${excelId}`, true);
+                    location.reload(true); // Hard reload
+                    xhr.onload = function () {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            console.log(xhr.responseText); // Log the response from the server
+                            location.reload(true); // Hard reload
+
+                        } else {
+                            console.error('Request failed with status:', xhr.status);
+                            // Handle error cases
+                        }
+                    };
+
+                    xhr.onerror = function () {
+                        console.error('Request failed');
+                        // Handle error cases
+                    };
+
+                    xhr.send();
+                }
+            });
+        }
+
+
+    function openAdminLogin() {
+        // Implement logic to open the admin login modal or navigate to the login page
+        window.location.href = '/login'; // Replace '/login' with your login route
+
+        console.log('Admin login clicked');
+        // Add your login logic here
+    }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forget Password</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #8e9eab, #eef2f3);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            width: 350px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .card-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-change {
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $( "#form2" ).submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/forgetpass',
+                    data: $('#form2').serialize(),
+                    dataType: "json",
+                    success: function(response){
+                        $('#form2')[0].reset();
+                        document.getElementById("check").innerHTML=response.Success;
+                        setTimeout(function(){
+                            document.getElementById("check").innerHTML="";
+                        },3000);
+                        if (response.Success=="Password changed!") {
+                            document.getElementById("redirectLink").click();
+                        };
+                    },
+                    error: function() {
+                        // Handle error
+                    }
+                })
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h2 class="card-title">Change Password</h2>
+        <form id="form2" method="post">
+            <div class="form-group">
+                <input type="text" name="email" placeholder="E-mail" required="" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required="" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="password" name="passwordConf" placeholder="Confirm Password" required="" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Change" class="btn btn-success btn-change">
+            </div>
+        </form>
+        <div class="alert alert-danger">
+            <span id="check"></span>
+        </div>
+        <div>
+            <span>Remember your password? <a href="/login">Click here to login</a></span>
+        </div>
+        <a href="/profile" id="redirectLink" style="display:none;"></a>
+    </div>
+</body>
+</html>
