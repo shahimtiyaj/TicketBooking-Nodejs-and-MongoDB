@@ -1,6 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
+  <!-- Meta tags and CSS links -->
+  <link rel="stylesheet" href="https://bootswatch.com/4/cosmo/bootstrap.css">
+  <style>
+    .card-header-custom {
+            background-color: #ff8080; /* You can adjust this color */
+            color: #242121;
+            font-weight: bold;
+        }
+      /* Custom CSS for header */
+      .navbar-custom {
+          background-color: #343a40;
+          padding: 15px 0;
+          border-bottom: 3px solid #dc3545;
+      }
+
+      .navbar-custom .navbar-brand {
+          color: #ffffff;
+          font-size: 28px;
+          font-weight: bold;
+      }
+
+      .navbar-custom .navbar-nav .nav-link {
+          color: #ffffff;
+          font-size: 18px;
+          margin-right: 20px;
+      }
+
+      .navbar-custom .nav-link:hover {
+          color: #ffffff;
+          text-decoration: underline;
+      }
+
+      .btn-logout {
+          background-color: #dc3545;
+          color: #ffffff;
+          border: 2px solid #dc3545;
+          padding: 10px 25px;
+          border-radius: 30px;
+          font-size: 16px;
+          transition: all 0.3s ease;
+      }
+
+      .btn-logout:hover {
+          background-color: transparent;
+          color: #dc3545;
+          border-color: #dc3545;
+      }
+
+      /* Container styles */
+      .container-custom {
+          margin-top: 30px;
+      }
+
+      /* Table styles (adjust as needed) */
+      .table-custom {
+          border: 2px solid #dee2e6;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .table-custom th,
+      .table-custom td {
+          font-size: 16px;
+      }
+
+      /* Add more styles as needed */
+  </style>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -11,141 +81,220 @@
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <!-- Dropzone CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
 </head>
-<body>
-    <div class="fixed-top">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <a class="navbar-brand" href="#">Logistics</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- Admin Login Button -->
-            <div class="collapse navbar-collapse" id="navbarColor01">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <button class="btn btn-outline-light my-2 my-sm-0" onclick="openAdminLogin()">Admin Login</button>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </div>
 
-    <div class="row" style="margin-top: 125px; margin-left: 40%; margin-right: 10%; width: fit-content;">
-        <div class="lg-6">
-            <div class="card border-danger mb-3" style="max-width: 20rem;">
-                <div class="card-header">Upload Excel File</div>
-                <div class="card-body">
-                    <form action="/upload" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="excel">Browse File</label>
-                            <input type="file" class="form-control" name="excel" required><br><br>
-                            <input type="submit" value="Submit">
-                        </div>
-                    </form>
+<body>
+   <!-- Header Section -->
+   <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Admin Panel</a>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link btn-logout" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card border-danger custom-card">
+                    <div class="card-header card-header-custom">Upload Excel File</div>
+                    <div class="card-body">
+                        <form action="/upload" method="POST" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="excel">Browse File</label>
+                                <input type="file" class="form-control" name="excel" required><br><br>
+                                <input type="submit" value="Submit" class="btn btn-primary">
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div><br><br>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <% if(result.length> 0) { %>
+                    <table id="dataTable" class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Sl. No</th>
+                                <th>CN</th>
+                                <th>POL</th>
+                                <th>POD</th>
+                                <th>TOS</th>
+                                <th>ETA POD</th>
+                                <th>CARGO TYPE</th>
+                                <th>FRT(All In)</th>
+                                <th>Carrier</th>
+                                <th>VESSEL NAME</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for(var x=0; x < result.length; x++) { %>
+                                <tr id="row_<%= x + 1 %>">
+                                    <td>
+                                        <%= x + 1 %>
+                                    </td>
+                                    <td>
+                                        <div id="cn_container_<%= result[x]._id %>">
+                                            <span id="cn_span_<%= result[x]._id %>">
+                                                <%= result[x].cn %>
+                                            </span>
+                                            <input id="cn_input_<%= result[x]._id %>" type="text"
+                                                value="<%= result[x].cn %>" style="display: none;">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div id="pol_container_<%= result[x]._id %>">
+                                            <span id="pol_span_<%= result[x]._id %>">
+                                                <%= result[x].pol %>
+                                            </span>
+                                            <input id="pol_input_<%= result[x]._id %>" type="text"
+                                                value="<%= result[x].pol %>" style="display: none;">
+                                        </div>
+                                    </td>
+                                    <!-- Add other table data -->
+                                    <td>
+                                        <%= result[x].pod %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].tos %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].eta_pod %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].cargo_type %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].frt_all_in %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].carrier %>
+                                    </td>
+                                    <td>
+                                        <%= result[x].vessel_name %>
+                                    </td>
+                                    <td>
+                                        <!-- Add update and delete buttons with respective functionality -->
+                                        <button onclick="editRow('<%= result[x]._id %>')"
+                                            class="btn btn-sm btn-primary">Edit</button>
+                                        <button onclick="updateRow('<%= result[x]._id %>')"
+                                            class="btn btn-sm btn-success" style="display: none;">Update</button>
+                                        <button onclick="confirmDelete('<%= result[x]._id %>')"
+                                            class="btn btn-sm btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <% } %>
+                        </tbody>
+                    </table>
+                    <% } %>
+            </div>
+        </div>
+    </div>
 
-    <% if(result.length > 0) { %>
-        <table id="dataTable" class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Sl. No</th>
-                    <th>CN</th>
-                    <th>POL</th>
-                    <th>POD</th>
-                    <th>TOS</th>
-                    <th>ETA POD</th>
-                    <th>CARGO TYPE</th>
-                    <th>FRT(All In)</th>
-                    <th>Carrier</th>
-                    <th>VESSEL NAME</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for(var x = 0; x < result.length; x++) { %>
-                    <tr id="row_<%= x + 1 %>">
-                        <td ><%= x + 1 %></td>
-                        <td contenteditable="true"><%= result[x].cn %></td>
-                        <td><%= result[x].pol %></td>
-                        <td><%= result[x].pod %></td>
-                        <td><%= result[x].tos %></td>
-                        <td><%= result[x].eta_pod %></td>
-                        <td><%= result[x].cargo_type %></td>
-                        <td><%= result[x].frt_all_in %></td>
-                        <td><%= result[x].carrier %></td>
-                        <td><%= result[x].vessel_name %></td>
-                        <td>
-                            <!-- Add update and delete buttons with respective functionality -->
-                            <button onclick="editRow('<%= result[x]._id %>')">Edit</button>
-                            <button  onclick="updateRow('<%= result[x]._id %>')">Update</button>
-                            <button onclick="confirmDelete('<%= result[x]._id %>')">Delete</button>
-
-                        </td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
-    <% } %>
-
-    <!-- Bootstrap and DataTables JS -->
+    <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Dropzone JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-     <!-- Scripts -->
-     <script>
+    <!-- Scripts -->
+    <script>
         // DataTables initialization script
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#dataTable').DataTable();
         });
 
         function editRow(excelId) {
-        document.getElementById(`cn_${excelId}`).setAttribute('contenteditable', 'true');
-        document.getElementById(`pol_${excelId}`).setAttribute('contenteditable', 'true');
-        // Include other columns in a similar manner
+            const cnSpan = document.getElementById(`cn_span_${excelId}`);
+            const cnInput = document.getElementById(`cn_input_${excelId}`);
+            const polSpan = document.getElementById(`pol_span_${excelId}`);
+            const polInput = document.getElementById(`pol_input_${excelId}`);
+            const updateBtn = document.querySelector(`button[onclick="updateRow('${excelId}')"]`);
 
-        document.querySelector(`button[onclick="updateRow('${excelId}')"]`).style.display = 'inline-block';
-    }
-
-    function updateRow(excelId) {
-        const updatedData = {
-            cn: document.getElementById(`cn_${excelId}`).innerText,
-            pol: document.getElementById(`pol_${excelId}`).innerText,
-            // Include other columns in a similar manner
-        };
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', `/updateExcel/${excelId}`, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                console.log(xhr.responseText);
-                // Hide the update button after updating the data
-                document.querySelector(`button[onclick="updateRow('${excelId}')"]`).style.display = 'none';
-                // Disable contenteditable after update
-                document.getElementById(`cn_${excelId}`).setAttribute('contenteditable', 'false');
-                document.getElementById(`pol_${excelId}`).setAttribute('contenteditable', 'false');
-                // Include other columns in a similar manner
-            } else {
-                console.error('Request failed with status:', xhr.status);
-                // Handle error cases
+            if (cnSpan && cnInput || polSpan && polInput) {
+                cnSpan.style.display = 'none';
+                cnInput.style.display = 'inline-block';
+                polSpan.style.display = 'none';
+                polInput.style.display = 'inline-block';
+                updateBtn.style.display = 'inline-block';
             }
-        };
+        }
 
-        xhr.onerror = function () {
-            console.error('Request failed');
-            // Handle error cases
-        };
+        function updateRow(excelId) {
+            const cnSpan = document.getElementById(`cn_span_${excelId}`);
+            const cnInput = document.getElementById(`cn_input_${excelId}`);
+            const polSpan = document.getElementById(`pol_span_${excelId}`);
+            const polInput = document.getElementById(`pol_input_${excelId}`);
 
-        xhr.send(JSON.stringify(updatedData));
-    }
+            const updateBtn = document.querySelector(`button[onclick="updateRow('${excelId}')"]`);
+
+            if (cnSpan && cnInput || polSpan && polInput) {
+                // Get the updated value from the input field
+                const updatedData = {
+                    cn: cnInput.value,
+                    pol: polInput.value,
+
+                    // Add other fields in a similar manner
+                };
+
+                // Rest of our update logic using updatedData
+
+                // Fetch request to update the data in the server
+                fetch(`/updateExcel/${excelId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+                        location.reload(true); // Hard reload
+
+                        // Hide or update UI after successful update
+
+                        // Update the span with the new value
+                        cnSpan.innerText = updatedData.cn;
+                        polSpan.innerText = updatedData.pol;
+
+
+                        // Toggle visibility of elements
+                        cnSpan.style.display = 'inline-block';
+                        cnInput.style.display = 'none';
+                        polSpan.style.display = 'inline-block';
+                        polInput.style.display = 'none';
+                        updateBtn.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Handle error cases
+                    });
+            }
+        }
 
 
 
@@ -186,14 +335,27 @@
         }
 
 
-    function openAdminLogin() {
-        // Implement logic to open the admin login modal or navigate to the login page
-        window.location.href = '/login'; // Replace '/login' with your login route
+        function openAdminLogin() {
+            // Implement logic to open the admin login modal or navigate to the login page
+            window.location.href = '/login'; // Replace '/login' with your login route
 
-        console.log('Admin login clicked');
-        // Add your login logic here
-    }
+            console.log('Admin login clicked');
+            // Add your login logic here
+        }
+
+        // Dropzone.js initialization
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone("#fileUpload", {
+            url: "/upload",
+            paramName: "excel",
+            maxFilesize: 10, // Specify the maximum file size in MB
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop files here or click to upload",
+            dictRemoveFile: "Remove file",
+            // Add any other configuration options you require
+        });
 
     </script>
 </body>
+
 </html>

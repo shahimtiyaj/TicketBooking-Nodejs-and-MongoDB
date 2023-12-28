@@ -10,7 +10,8 @@ var MongoStore = require('connect-mongo')(session);
 
 mongoose.connect('mongodb+srv://imtiyajdream:shahimtiyaj@cluster0.4jymlh6.mongodb.net/registrationForm?retryWrites=true&w=majority', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useFindAndModify: false // Set useFindAndModify to false
 }, (err) => {
   if (!err) {
     console.log('MongoDB Connection Succeeded.');
